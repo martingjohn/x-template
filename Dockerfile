@@ -1,18 +1,23 @@
-FROM ubuntu:rolling
+FROM alpine:3.7
 
 ENV uid=1000
 ENV gid=1000
-ENV user=ubuntu
+ENV user=alpine
 
-RUN apt-get update && apt-get install -y \
-            x11-apps \
-            mesa-utils \
-            alsa-utils \
-            pulseaudio
+RUN apk update \
+ && apk add xeyes \
+            sudo
 
-RUN groupadd -g $gid $user \
- && useradd -u $uid -g $gid -m $user
+RUN addgroup -g $gid $user \
+ && adduser -u $uid -G $user -s /bin/ash -D $user \
+ && echo "$user:$user" | /usr/sbin/chpasswd \
+ && echo "$user ALL=(ALL) ALL" >> /etc/sudoers
 
 USER $user
 
-CMD /bin/bash
+WORKDIR /tmp
+
+USER $user
+
+CMD /bin/ash
+
